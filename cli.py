@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import sys
 import urllib
@@ -8,7 +8,8 @@ import simplejson
 from pprint import pprint
 from optparse import OptionParser
 
-GRAPH_URL = 'graph.facebook.com' 
+GRAPH_URL = 'graph.facebook.com'
+CLI_FILE = './cli.txt'
 
 def get_access_token(app_id, app_secret):
     f = urllib2.urlopen("https://%s/oauth/access_token?client_id=%s&client_secret=%s&grant_type=client_credentials" %
@@ -35,21 +36,21 @@ def delete_user(user_id, access_token):
     conn.request('DELETE', "/%s?%s" % (user_id, access_token))
     r = conn.getresponse()
     content = r.read()
-    
+
     if content == 'true':
         return True
     else:
         return False
-        
+
 def modify_user(user_id, password):
     url = "https://%s/%s"
-    
+
     try:
         d1 = {'access_token': user_id['access_token'], 'password': password}
         f1 = urllib2.urlopen(url % (GRAPH_URL, user_id['id']),
                              data=urllib.urlencode(d1))
         content = f1.read()
-    
+
         if content == 'true':
             return 'New password of "%s" for %s set.' % (password,user_id['id'],)
         else:
@@ -57,10 +58,10 @@ def modify_user(user_id, password):
     except urllib2.HTTPError, e:
         error = simplejson.loads(e.read())
         print error['error']['message']
-    
+
 def friend_users(user_1, user_2):
     url = "https://%s/%s/friends/%s"
-    
+
     try:
         print "User 1 -> User 2...",
         d1 = {'access_token': user_1['access_token']}
@@ -87,7 +88,7 @@ def print_users(users):
     if len(users) == 0:
         print "No users."
         return
-    
+
     print 'Users: '
     i = 1
     for user in users:
@@ -104,7 +105,7 @@ def print_users(users):
 def question(question, options):
     while True:
         options_str = '/'.join(options)
-        answer = raw_input(" %s (%s): " % (question, options_str)).strip().upper()        
+        answer = raw_input(" %s (%s): " % (question, options_str)).strip().upper()
         if answer in options:
             return answer
 
@@ -115,19 +116,29 @@ def question_user(question):
             user = users[user_num]
             return user
         except (IndexError, ValueError), e:
-            print 'Invalid user number.'    
-        
+            print 'Invalid user number.'
+
 if __name__ == '__main__':
     usage = "usage: %prog <app_id> <app_secret>"
     parser = OptionParser(usage=usage)
     (options, args) = parser.parse_args()
 
     if len(args) != 2:
-        parser.error('App ID and secret are required')
-        sys.exit(1)
-
-    app_id = args[0]
-    app_secret = args[1]
+        try:
+            f = open(CLI_FILE)
+            params = simplejson.loads(f.readline())
+            app_id = params['app_id']
+            app_secret = params['app_secret']
+            f.close()
+        except Exception, e:
+            parser.error('App ID and secret are required')
+            sys.exit(1)
+    else:
+        app_id = args[0]
+        app_secret = args[1]
+        f = open(CLI_FILE, 'w')
+        f.write(simplejson.dumps({'app_id': app_id, 'app_secret': app_secret}))
+        f.close()
 
     print 'Getting access token...',
     access_token = get_access_token(app_id, app_secret)
@@ -179,7 +190,7 @@ if __name__ == '__main__':
                     users = load_users(app_id, access_token)
                 elif cmd == 'q' or cmd == 'quit' or cmd == 'exit':
                     sys.exit(1)
-                    
+
                 elif cmd =='m':
                     user_1 = question_user('User ')
                     password = raw_input("Enter Password: ").strip()

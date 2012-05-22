@@ -1,19 +1,28 @@
 
 # facebook-test-users
 
-  This is a script for managing Facebook [test users](http://developers.facebook.com/docs/test_users/).
+  This is a script for managing Facebook [test users]
+  (http://developers.facebook.com/docs/test_users/).
 
 ## Usage
-  
+
   Start it like:
 
     ./cli.py APP_ID APP_SECRET
 
   Type `?` at the prompt for a list of commands.
 
+## cli.txt
+
+  To keep from having to enter the APP_ID and APP_SECRET repeatedly,
+  each time you enter these on the command line they are saved to a file
+  named cli.txt. Next time you can run ./cli.py without these and it will
+  look for this file to load the values.
+
 ## API Usage
 
-  The user list is automatically reloaded after any command that could change it. Use the `r` command to reload it manually.
+  The user list is automatically reloaded after any command that could
+  change it. Use the `r` command to reload it manually.
 
 ## License
 
