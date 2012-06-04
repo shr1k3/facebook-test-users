@@ -11,13 +11,15 @@ from optparse import OptionParser
 GRAPH_URL = 'graph.facebook.com'
 CLI_FILE = './cli.txt'
 
+
 def get_access_token(app_id, app_secret):
     f = urllib2.urlopen("https://%s/oauth/access_token?client_id=%s&client_secret=%s&grant_type=client_credentials" %
                         (GRAPH_URL, app_id, app_secret))
     return f.read()
 
 def load_users(app_id, access_token):
-    f = urllib2.urlopen("https://%s/%s/accounts/test-users?%s" % (GRAPH_URL, app_id, access_token))
+    f = urllib2.urlopen("https://%s/%s/accounts/test-users?%s" % \
+                        (GRAPH_URL, app_id, access_token))
     return simplejson.loads(f.read())['data']
 
 def create_user(app_id, access_token, installed=None, permissions=None):
@@ -27,7 +29,8 @@ def create_user(app_id, access_token, installed=None, permissions=None):
     if permissions is not None and len(permissions) > 0:
         data['permissions'] = permissions
 
-    f = urllib2.urlopen("https://%s/%s/accounts/test-users?%s" % (GRAPH_URL, app_id, access_token),
+    f = urllib2.urlopen("https://%s/%s/accounts/test-users?%s" % \
+                        (GRAPH_URL, app_id, access_token),
                         data=urllib.urlencode(data))
     return simplejson.loads(f.read())
 
@@ -164,7 +167,8 @@ if __name__ == '__main__':
                                            installed_options[installed],
                                            permissions)
                     users = load_users(app_id, access_token)
-                    print "User added."
+                    print "User added. email: {0}  password: {1}". \
+                          format(new_user['email'], new_user['password'])
                 elif cmd == 'l':
                     print_users(users)
                 elif cmd == 'r':
