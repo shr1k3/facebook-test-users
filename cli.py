@@ -4,7 +4,7 @@ import sys
 import urllib
 import urllib2
 import httplib
-import simplejson
+import json
 from pprint import pprint
 from optparse import OptionParser
 
@@ -20,7 +20,7 @@ def get_access_token(app_id, app_secret):
 def load_users(app_id, access_token):
     f = urllib2.urlopen("https://%s/%s/accounts/test-users?%s" % \
                         (GRAPH_URL, app_id, access_token))
-    return simplejson.loads(f.read())['data']
+    return json.loads(f.read())['data']
 
 def create_user(app_id, access_token, installed=None, permissions=None):
     data = {}
@@ -32,7 +32,7 @@ def create_user(app_id, access_token, installed=None, permissions=None):
     f = urllib2.urlopen("https://%s/%s/accounts/test-users?%s" % \
                         (GRAPH_URL, app_id, access_token),
                         data=urllib.urlencode(data))
-    return simplejson.loads(f.read())
+    return json.loads(f.read())
 
 def delete_user(user_id, access_token):
     conn = httplib.HTTPSConnection(GRAPH_URL)
@@ -59,7 +59,7 @@ def modify_user(user_id, password):
         else:
             return 'Error:Password for %s not changed.' % (user_id['id'],)
     except urllib2.HTTPError, e:
-        error = simplejson.loads(e.read())
+        error = json.loads(e.read())
         print error['error']['message']
 
 def friend_users(user_1, user_2):
@@ -73,7 +73,7 @@ def friend_users(user_1, user_2):
         r1 = f1.read()
         print "done."
     except urllib2.HTTPError, e:
-        error = simplejson.loads(e.read())
+        error = json.loads(e.read())
         print error['error']['message']
 
     try:
@@ -84,7 +84,7 @@ def friend_users(user_1, user_2):
         r2 = f2.read()
         print "done."
     except urllib2.HTTPError, e:
-        error = simplejson.loads(e.read())
+        error = json.loads(e.read())
         print error['error']['message']
 
 def print_users(users):
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     if len(args) != 2:
         try:
             f = open(CLI_FILE)
-            params = simplejson.loads(f.readline())
+            params = json.loads(f.readline())
             app_id = params['app_id']
             app_secret = params['app_secret']
             f.close()
@@ -140,7 +140,7 @@ if __name__ == '__main__':
         app_id = args[0]
         app_secret = args[1]
         f = open(CLI_FILE, 'w')
-        f.write(simplejson.dumps({'app_id': app_id, 'app_secret': app_secret}))
+        f.write(json.dumps({'app_id': app_id, 'app_secret': app_secret}))
         f.close()
 
     print 'Getting access token...',
