@@ -13,14 +13,17 @@ CLI_FILE = './cli.txt'
 
 
 def get_access_token(app_id, app_secret):
-    f = urllib2.urlopen("https://%s/oauth/access_token?client_id=%s&client_secret=%s&grant_type=client_credentials" %
-                        (GRAPH_URL, app_id, app_secret))
+    f = urllib2.urlopen("https://%s/oauth/access_token" \
+            "?client_id=%s&client_secret=%s&grant_type=client_credentials" %
+            (GRAPH_URL, app_id, app_secret))
     return f.read()
+
 
 def load_users(app_id, access_token):
     f = urllib2.urlopen("https://%s/%s/accounts/test-users?%s" % \
                         (GRAPH_URL, app_id, access_token))
     return json.loads(f.read())['data']
+
 
 def create_user(app_id, access_token, installed=None, permissions=None):
     data = {}
@@ -34,6 +37,7 @@ def create_user(app_id, access_token, installed=None, permissions=None):
                         data=urllib.urlencode(data))
     return json.loads(f.read())
 
+
 def delete_user(user_id, access_token):
     conn = httplib.HTTPSConnection(GRAPH_URL)
     conn.request('DELETE', "/%s?%s" % (user_id, access_token))
@@ -45,6 +49,7 @@ def delete_user(user_id, access_token):
     else:
         return False
 
+
 def modify_user(user_id, password):
     url = "https://%s/%s"
 
@@ -55,12 +60,14 @@ def modify_user(user_id, password):
         content = f1.read()
 
         if content == 'true':
-            return 'New password of "%s" for %s set.' % (password,user_id['id'],)
+            return 'New password of "%s" for %s set.' % \
+                (password, user_id['id'])
         else:
-            return 'Error:Password for %s not changed.' % (user_id['id'],)
+            return 'Error:Password for %s not changed.' % (user_id['id'])
     except urllib2.HTTPError, e:
         error = json.loads(e.read())
         print error['error']['message']
+
 
 def friend_users(user_1, user_2):
     url = "https://%s/%s/friends/%s"
@@ -87,6 +94,7 @@ def friend_users(user_1, user_2):
         error = json.loads(e.read())
         print error['error']['message']
 
+
 def print_users(users):
     if len(users) == 0:
         print "No users."
@@ -99,27 +107,29 @@ def print_users(users):
         if 'access_token' in user:
             token_str = user['access_token']
 
-        print "  %s - %s:\n        login_url: %s\n        token: %s" % (i,
-                                                                        user['id'],
-                                                                        user['login_url'],
-                                                                        token_str)
+        print "  %s - %s:\n        login_url: %s\n        token: %s" % \
+            (i, user['id'], user['login_url'], token_str)
         i += 1
+
 
 def question(question, options):
     while True:
         options_str = '/'.join(options)
-        answer = raw_input(" %s (%s): " % (question, options_str)).strip().upper()
+        answer = raw_input(" %s (%s): " % \
+            (question, options_str)).strip().upper()
         if answer in options:
             return answer
+
 
 def question_user(question):
     while True:
         try:
-            user_num = int(raw_input(" %s #: " % question))-1
+            user_num = int(raw_input(" %s #: " % question)) - 1
             user = users[user_num]
             return user
         except (IndexError, ValueError), e:
             print 'Invalid user number.'
+
 
 if __name__ == '__main__':
     usage = "usage: %prog <app_id> <app_secret>"
@@ -157,7 +167,9 @@ if __name__ == '__main__':
             if len(input) != 0:
                 cmd = input.strip()
                 if cmd == '?':
-                    print "Command action\n  a  Add user\n  l  List users\n  m  Modify user\n  r  Reload user list\n  d  Delete user\n  f  Friend users\n  q  Quit"
+                    print "Command action\n  a  Add user\n  l  List users\n" \
+                          "m  Modify user\n  r  Reload user list\n" \
+                          "d  Delete user\n  f  Friend users\n  q  Quit"
                 elif cmd == 'a':
                     installed = question('Installed', ['Y', 'N'])
                     installed_options = {'Y': 'true', 'N': 'false'}
@@ -178,7 +190,8 @@ if __name__ == '__main__':
                     user_1 = question_user('First User')
                     user_2 = question_user('Second User')
 
-                    if 'access_token' not in user_1 or 'access_token' not in user_2:
+                    if 'access_token' not in user_1 or \
+                        'access_token' not in user_2:
                         print 'Both users need to have access tokens.'
                     elif user_1 == user_2:
                         print 'A user cannot befriend themselves. Tragic.'
@@ -195,10 +208,10 @@ if __name__ == '__main__':
                 elif cmd == 'q' or cmd == 'quit' or cmd == 'exit':
                     sys.exit(1)
 
-                elif cmd =='m':
+                elif cmd == 'm':
                     user_1 = question_user('User ')
                     password = raw_input("Enter Password: ").strip()
-                    modify_result = modify_user(user_1,password)
+                    modify_result = modify_user(user_1, password)
                     print modify_result
                 else:
                     print 'Unknown command.'
